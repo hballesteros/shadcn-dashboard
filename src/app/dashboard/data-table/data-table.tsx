@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -32,7 +34,6 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 
-import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -40,10 +41,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
+import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-
-import { useState } from 'react'
-import { set } from 'date-fns'
+import type { Payment } from '@/data/payments.data'
 
 
 interface DataTableProps<TData, TValue> {
@@ -60,6 +60,8 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
   const [currentStatus, setCurrentStatus] = useState('all')
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
+  const [rowSelection, setRowSelection] = useState({})
+  const isDeleteVisible = Object.keys(rowSelection).length > 0
 
   const table = useReactTable({
     data,
@@ -71,21 +73,23 @@ export function DataTable<TData, TValue>({
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
     state: {
       sorting,
       columnFilters,
       columnVisibility,
+      rowSelection,
     },
   })
 
   return (
     <>
       <div className="flex items-center justify-between py-4 gap-2">
-        
+
         <Input
           placeholder="Filter emails..."
           value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>  {
+          onChange={(event) => {
             setCurrentStatus("all")
             table.getColumn("status")?.setFilterValue(undefined)
             table.getColumn("email")?.setFilterValue(event.target.value)
@@ -103,7 +107,7 @@ export function DataTable<TData, TValue>({
               table.getColumn("status")?.setFilterValue(undefined)
               setCurrentStatus("all")
               return
-            } 
+            }
             setCurrentStatus(value)
             table.getColumn("status")?.setFilterValue(value)
           }}
@@ -122,6 +126,23 @@ export function DataTable<TData, TValue>({
             </SelectGroup>
           </SelectContent>
         </Select>
+
+        {
+          isDeleteVisible && (
+            <Button
+              variant="destructive"
+              onClick={() => {
+                // table.getPreSelectedRowModel().rows.forEach((row) => {
+                //   console.log(row.original);
+                // })
+                const ids = table.getSelectedRowModel().rows.map((row) => (row.original as Payment).clientName)
+                console.log(ids);
+              }}
+            >
+              Delete
+            </Button>
+          )
+        }
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -197,7 +218,14 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
+
       <div className="flex items-center justify-end space-x-2 py-4">
+
+        <div className="flex-1 text-sm text-muted-foreground py-4">
+          {table.getFilteredSelectedRowModel().rows.length} of{" "}
+          {table.getFilteredRowModel().rows.length} row(s) selected.
+        </div>
+
         <Button
           variant="outline"
           size="sm"
