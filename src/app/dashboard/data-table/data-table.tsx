@@ -97,8 +97,6 @@ export function DataTable<TData, TValue>({
           className="max-w-sm"
         />
 
-
-
         <Select
           value={currentStatus}
           onValueChange={(value) => {
@@ -219,7 +217,7 @@ export function DataTable<TData, TValue>({
       </div>
 
 
-      <div className="flex items-center justify-end space-x-2 py-4">
+      <div className="flex items-center justify-between space-x-2 py-4">
 
         <div className="flex-1 text-sm text-muted-foreground py-4">
           {table.getFilteredSelectedRowModel().rows.length} of{" "}
@@ -242,6 +240,29 @@ export function DataTable<TData, TValue>({
         >
           Next
         </Button>
+
+      </div>
+
+      <div className="w-[180px]">
+        <Select
+          onValueChange = {(value) => {
+            table.setPageSize(Number(value))
+          }}
+        >
+          <SelectTrigger >
+            <SelectValue placeholder="10 Rows" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectLabel>Rows per page</SelectLabel>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="30">30</SelectItem>
+              <SelectItem value="40">40</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
       </div>
     </>
 
